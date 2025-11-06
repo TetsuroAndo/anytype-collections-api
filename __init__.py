@@ -1,8 +1,8 @@
 """Anytype API操作モジュール
 
-AnytypeのAPIを通じてテーブル操作を行うモジュールです。
+AnytypeのAPIを通じてオブジェクト操作を行うモジュールです。
 """
 from .client import AnytypeClient
-from .table import TableManager, TableRow
+from .objects import ObjectManager, AnytypeObject
 
-__all__ = ["AnytypeClient", "TableManager", "TableRow"]
+__all__ = ["AnytypeClient", "ObjectManager", "AnytypeObject"]

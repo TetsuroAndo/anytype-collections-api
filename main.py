@@ -7,7 +7,7 @@ import argparse
 import sys
 
 from .client import AnytypeClient
-from .table import TableManager, TableRow
+from .objects import ObjectManager, AnytypeObject
 
 
 def main():
@@ -20,13 +20,14 @@ def main():
   # 環境変数からAPIキーを読み込む
   export ANYTYPE_API_KEY=your_api_key
   export ANYTYPE_API_URL=http://localhost:3030
+  export ANYTYPE_SPACE_ID=your_space_id
   python -m anytype.main
 
   # コマンドライン引数でAPIキーを指定
-  python -m anytype.main --api-key your_api_key --api-url http://localhost:3030
+  python -m anytype.main --api-key your_api_key --api-url http://localhost:3030 --space-id your_space_id
 
-  # テーブルIDを指定して接続テスト
-  python -m anytype.main --api-key your_api_key --table-id your_table_id
+  # スペースIDを指定して接続テスト
+  python -m anytype.main --api-key your_api_key --space-id your_space_id
         """.strip()
     )
 
@@ -43,10 +44,10 @@ def main():
         help="Anytype API URL（環境変数 ANYTYPE_API_URL からも取得可能、デフォルト: http://localhost:3030）",
     )
     parser.add_argument(
-        "--table-id",
+        "--space-id",
         type=str,
         default=None,
-        help="テーブルID（指定した場合、接続テストを実行）",
+        help="スペースID（環境変数 ANYTYPE_SPACE_ID からも取得可能、指定した場合、接続テストを実行）",
     )
 
     args = parser.parse_args()
@@ -61,24 +62,42 @@ def main():
         print("✅ Anytypeクライアントの初期化に成功しました")
         print(f"   API URL: {client.api_url}")
 
-        # テーブルIDが指定されている場合は接続テスト
-        if args.table_id:
-            print(f"\n📊 テーブルID: {args.table_id}")
+        # スペースIDが指定されている場合は接続テスト
+        if args.space_id:
+            space_id = args.space_id
+        else:
+            import os
+            space_id = os.getenv("ANYTYPE_SPACE_ID")
+
+        if space_id:
+            print(f"\n📦 スペースID: {space_id}")
             print("   接続テストを実行中...")
 
-            table_manager = TableManager(client=client, table_id=args.table_id)
+            object_manager = ObjectManager(client=client, space_id=space_id)
 
-            # テーブルの行を取得して接続を確認
+            # テストオブジェクトを作成して接続を確認
             try:
-                result = table_manager.get_rows(limit=1)
-                print("✅ テーブルへの接続に成功しました")
-                if "rows" in result:
-                    print(f"   行数: {len(result.get('rows', []))}件（最初の1件のみ取得）")
+                test_object = AnytypeObject(
+                    name="接続テスト",
+                    body="これは接続テスト用のオブジェクトです。",
+                    type_key="page",
+                    icon={"emoji": "✅", "format": "emoji"},
+                )
+                result = object_manager.create_object(test_object)
+                print("✅ スペースへの接続に成功しました")
+                if "id" in result:
+                    print(f"   テストオブジェクトID: {result.get('id')}")
+                    # テストオブジェクトを削除（アーカイブ）
+                    try:
+                        object_manager.delete_object(result["id"])
+                        print("   テストオブジェクトを削除しました")
+                    except Exception as e:
+                        print(f"   警告: テストオブジェクトの削除に失敗しました: {e}")
             except Exception as e:
-                print(f"❌ テーブルへの接続に失敗しました: {e}")
+                print(f"❌ スペースへの接続に失敗しました: {e}")
                 sys.exit(1)
         else:
-            print("\n💡 ヒント: --table-id を指定すると接続テストを実行できます")
+            print("\n💡 ヒント: --space-id を指定するか、環境変数 ANYTYPE_SPACE_ID を設定すると接続テストを実行できます")
 
     except ValueError as e:
         print(f"❌ エラー: {e}", file=sys.stderr)

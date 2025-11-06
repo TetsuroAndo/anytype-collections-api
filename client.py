@@ -34,6 +34,7 @@ class AnytypeClient:
         self.session.headers.update({
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
+            "Anytype-Version": "2025-05-20",
         })
 
     def _request(
@@ -77,6 +78,10 @@ class AnytypeClient:
     def put(self, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """PUTリクエストを送信"""
         return self._request("PUT", endpoint, data=data)
+
+    def patch(self, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """PATCHリクエストを送信"""
+        return self._request("PATCH", endpoint, data=data)
 
     def delete(self, endpoint: str) -> Dict[str, Any]:
         """DELETEリクエストを送信"""
