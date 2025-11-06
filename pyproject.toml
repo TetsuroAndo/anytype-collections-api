@@ -20,5 +20,8 @@ dev = [
     "ruff>=0.14.2",
 ]
 
+[project.scripts]
+anytype = "anytype.main:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["anytype"]

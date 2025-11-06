@@ -104,6 +104,49 @@ result = table_manager.get_rows(limit=10, offset=0)
 result = table_manager.get_rows(filters={"status": "active"})
 ```
 
+### コマンドラインエントリーポイント
+
+このライブラリはコマンドラインから直接実行可能なエントリーポイントを提供しています。
+
+#### 基本的な使用方法
+
+```bash
+# 環境変数からAPIキーを読み込む
+export ANYTYPE_API_KEY=your_api_key
+export ANYTYPE_API_URL=http://localhost:3030
+python -m anytype.main
+
+# コマンドライン引数でAPIキーを指定
+python -m anytype.main --api-key your_api_key --api-url http://localhost:3030
+
+# テーブルIDを指定して接続テストを実行
+python -m anytype.main --api-key your_api_key --table-id your_table_id
+```
+
+#### オプション
+
+- `--api-key`: Anytype APIキー（環境変数 `ANYTYPE_API_KEY` からも取得可能）
+- `--api-url`: Anytype API URL（環境変数 `ANYTYPE_API_URL` からも取得可能、デフォルト: `http://localhost:3030`）
+- `--table-id`: テーブルID（指定した場合、接続テストを実行）
+
+#### ヘルプの表示
+
+```bash
+python -m anytype.main --help
+```
+
+#### パッケージインストール後の使用
+
+パッケージをインストールすると、`anytype`コマンドが直接使用可能になります：
+
+```bash
+# パッケージをインストール
+pip install -e .
+
+# コマンドラインから直接実行
+anytype --api-key your_api_key --table-id your_table_id
+```
+
 ## APIリファレンス
 
 ### AnytypeClient
@@ -169,6 +212,7 @@ anytype/
 ├── __init__.py          # パブリックAPIのエクスポート
 ├── client.py           # AnytypeClientクラス
 ├── table.py            # TableManagerとTableRowクラス
+├── main.py             # コマンドラインエントリーポイント
 ├── pyproject.toml      # パッケージ設定
 └── README.md           # このファイル
 ```
