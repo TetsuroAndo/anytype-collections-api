@@ -5,6 +5,7 @@ Anytypeクライアントを初期化してテストします。
 """
 import argparse
 import sys
+from dotenv import load_dotenv
 
 from .client import AnytypeClient
 from .objects import ObjectManager, AnytypeObject
@@ -12,6 +13,11 @@ from .objects import ObjectManager, AnytypeObject
 
 def main():
     """メイン処理"""
+    # .envファイルから環境変数を読み込む
+    # 確実に.envを読み込むには、プロジェクトルートで実行するか、
+    # 環境変数で直接設定してください。
+    load_dotenv()
+
     parser = argparse.ArgumentParser(
         description="Anytype APIクライアントのエントリーポイント",
         formatter_class=argparse.RawDescriptionHelpFormatter,
