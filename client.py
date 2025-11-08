@@ -54,6 +54,9 @@ class AnytypeClient:
 
         Returns:
             APIレスポンスのJSONデータ
+
+        Raises:
+            requests.exceptions.HTTPError: HTTPエラーの場合
         """
         url = f"{self.api_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
@@ -63,7 +66,31 @@ class AnytypeClient:
             json=data,
             params=params,
         )
-        response.raise_for_status()
+
+        # エラーレスポンスの詳細を確認
+        if not response.ok:
+            error_detail = f"HTTP {response.status_code}"
+            try:
+                error_body = response.json()
+                if isinstance(error_body, dict):
+                    error_detail += f": {error_body}"
+                else:
+                    error_detail += f": {error_body}"
+            except Exception:
+                error_detail += f": {response.text[:500]}"  # 最初の500文字のみ
+
+            # リクエストデータも含める（デバッグ用）
+            if data:
+                import json
+                try:
+                    request_data_str = json.dumps(data, ensure_ascii=False, indent=2)[:1000]
+                    error_detail += f"\nリクエストデータ: {request_data_str}"
+                except Exception:
+                    error_detail += "\nリクエストデータ: (JSON変換失敗)"
+
+            # 詳細情報を含むHTTPErrorを発生
+            http_error = requests.exceptions.HTTPError(error_detail, response=response)
+            raise http_error
 
         return response.json()
 
